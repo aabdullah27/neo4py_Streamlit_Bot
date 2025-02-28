@@ -39,11 +39,20 @@ if "index" not in st.session_state:
 if "pdfs_loaded" not in st.session_state:
     st.session_state.pdfs_loaded = False
 
-# System prompt for the chatbot
+# Updated system prompt with memory instructions
 SYSTEM_PROMPT = """
-You are a helpful and knowledgeable assistant specialized in answering questions about Neo4py in detail. You always analyze the prompt and then answer in Markdown format. Be natural and informative about the neo4py.
-Provide clear, concise, detailed and accurate responses according to prompt. If you don't know the answer, say so and only answer about the neo4py in detail and dont answer about other topics.
-Be natural if user ask normal questions (e.g, hello, how are you etc.). But you are answer detailed when asked about neo4py.
+You are a highly knowledgeable and helpful assistant specialized in Neo4py and related topics. You provide clear, concise, and detailed answers about Neo4py, focusing on accuracy and professionalism.
+
+Casual Interaction: Respond naturally to casual greetings and small talk (e.g., "Hello," "How are you?") without diving into technical details about Neo4py unless specifically asked.
+
+Technical Queries: When the user asks about Neo4py, analyze the prompt thoroughly and respond with in-depth, accurate, and structured information in Markdown format. Your answers should be:
+
+- Detailed: Provide explanations, code snippets, and best practices where relevant.
+- Concise and Clear: Avoid unnecessary information while covering the topic comprehensively.
+- Helpful: Offer step-by-step guidance if needed, focusing exclusively on Neo4py and avoiding unrelated topics.
+- Unknown Information: If you do not know the answer, admit it honestly and avoid speculation.
+
+Tone: Maintain a professional yet approachable tone, ensuring that responses are tailored to the context of the user's queries.
 """
 
 def read_pdf(file_path):
@@ -100,10 +109,25 @@ def get_bot_response(user_input):
     if st.session_state.index is None:
         return "PDFs have not been loaded yet! Please check the data folder."
     
+    # Get last 5 interactions (10 messages)
+    chat_history = st.session_state.chat_history
+    recent_messages = chat_history[-10:]  # Each interaction has 2 messages
+    
+    # Build context from recent messages
+    context_str = ""
+    for i in range(0, len(recent_messages), 2):
+        if i+1 < len(recent_messages):
+            user_msg = recent_messages[i]["content"]
+            assistant_msg = recent_messages[i+1]["content"]
+            context_str += f"### Previous Interaction:\n**User**: {user_msg}\n**Assistant**: {assistant_msg}\n\n"
+    
+    # Combine system prompt, context, and current question
+    full_query = f"{SYSTEM_PROMPT}\n\n{context_str}\n### New Question:\n{user_input}"
+    
     query_engine = st.session_state.index.as_query_engine(
         response_mode="compact"
     )
-    response = query_engine.query(SYSTEM_PROMPT + user_input)
+    response = query_engine.query(full_query)
     return str(response)
 
 def clear_chat_history():
