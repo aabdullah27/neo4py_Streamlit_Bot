@@ -19,7 +19,7 @@ import faiss
 from llama_index.core import VectorStoreIndex, Document, Settings
 from llama_index.vector_stores.faiss import FaissVectorStore
 from llama_index.embeddings.gemini import GeminiEmbedding
-from llama_index.llms.groq import Groq
+from llama_index.llms.gemini import Gemini  # Changed from Groq to Gemini
 import pymupdf4llm
 import os
 import glob
@@ -29,7 +29,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Get API keys from environment variables
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 # Initialize session state
@@ -42,8 +41,9 @@ if "pdfs_loaded" not in st.session_state:
 
 # System prompt for the chatbot
 SYSTEM_PROMPT = """
-You are a helpful and knowledgeable assistant specialized in answering questions about Neo4py and related topics. You always analyze the prompt and then answer in Markdown format.
-Provide clear, concise, detailed and accurate responses. If you don't know the answer, say so and suggest where the user might find more information.
+You are a helpful and knowledgeable assistant specialized in answering questions about Neo4py in detail. You always analyze the prompt and then answer in Markdown format. Be natural and informative about the neo4py.
+Provide clear, concise, detailed and accurate responses according to prompt. If you don't know the answer, say so and only answer about the neo4py in detail and dont answer about other topics.
+Be natural if user ask normal questions (e.g, hello, how are you etc.). But you are answer detailed when asked about neo4py.
 """
 
 def read_pdf(file_path):
@@ -80,8 +80,8 @@ def load_pdfs_from_folder():
     faiss_index = faiss.IndexFlatL2(d)
     vector_store = FaissVectorStore(faiss_index=faiss_index)
     
-    # Initialize Groq LLM and Gemini embedding model
-    llm = Groq(api_key=GROQ_API_KEY, model="llama-3.3-70b-versatile")
+    # Initialize Gemini LLM and embedding model
+    llm = Gemini(model="models/gemini-2.0-flash", api_key=GOOGLE_API_KEY)  # Changed from Groq to Gemini
     embed_model = GeminiEmbedding(
         model_name="models/embedding-001", 
         api_key=GOOGLE_API_KEY
