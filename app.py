@@ -1,5 +1,13 @@
 import streamlit as st
 from PIL import Image
+import base64
+from io import BytesIO
+
+# Helper function to convert image to base64
+def image_to_base64(image):
+    buffered = BytesIO()
+    image.save(buffered, format="PNG")
+    return base64.b64encode(buffered.getvalue()).decode()
 
 # Load the PNG image from the assets folder
 image = Image.open("assets/minion.png")
@@ -108,7 +116,6 @@ if not st.session_state.pdfs_loaded:
         if num_docs:
             st.session_state.pdfs_loaded = True
 
-
 # Sidebar
 with st.sidebar:
     st.header("🧹 Clear Chat")
@@ -117,16 +124,17 @@ with st.sidebar:
         st.rerun()
 
 # Main content area
-# Use columns to display the image and text side by side
-col2, col1 = st.columns([1, 2])  # Adjust the ratio as needed
-
-with col1:
-    st.image(image, width=100)  # Display the image
-
-with col2:
-    st.title("Neo4py QA Bot")  # Display the title
-st.write("Welcome to the Neo4py QA Bot!")  # Display the description
-
+# Use HTML and CSS to display the image and text inline
+st.markdown(
+    f"""
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <img src="data:image/png;base64,{image_to_base64(image)}" alt="Neo4py Logo" width="50" style="vertical-align: middle;">
+        <h1 style="margin: 0;">Neo4py QA Bot</h1>
+    </div>
+    <p>Welcome to the Neo4py QA Bot!</p>
+    """,
+    unsafe_allow_html=True
+)
 
 # Check if data folder exists
 if not os.path.exists("data"):
