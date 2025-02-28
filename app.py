@@ -34,8 +34,8 @@ if "pdfs_loaded" not in st.session_state:
 
 # System prompt for the chatbot
 SYSTEM_PROMPT = """
-You are a helpful and knowledgeable assistant specialized in answering questions about Neo4py and related topics. You always answer in detail and provide only relevant information to the user.
-Provide clear, concise, detailed and accurate responses. If you don't know the answer, say so and suggest where the user might find more information. Answer in detailed Markdown
+You are a helpful and knowledgeable assistant specialized in answering questions about Neo4py and related topics. You always analyze the prompt and then answer in Markdown format.
+Provide clear, concise, detailed and accurate responses. If you don't know the answer, say so and suggest where the user might find more information.
 """
 
 def read_pdf(file_path):
